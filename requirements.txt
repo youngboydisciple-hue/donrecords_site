@@ -8,7 +8,7 @@ python-dotenv==1.0.0
 werkzeug==2.3.7
 paypalrestsdk==1.13.3
 requests==2.31.0
-pillow==10.3.0 --only-binary=:all:
+pillow==11.0.0
 flask-mail==0.9.1
 python-slugify==8.0.1
 flask-ckeditor==0.4.6
