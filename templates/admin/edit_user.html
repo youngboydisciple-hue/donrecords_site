@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Edit User</h1>
+            <p class="lead">Modify user information and permissions</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if user.profile_image %}
+                            <img src="{{ url_for('static', filename=user.profile_image) }}" alt="{{ user.username }}" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; background-color: #e9ecef;">
+                                <i class="fas fa-user fa-4x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <h5>{{ user.username }}</h5>
+                        <p class="text-muted">{{ user.email }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Account Details</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Role
+                                <span class="badge bg-primary">{{ user.role.value }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Status
+                                {% if user.is_active and user.is_approved %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif not user.is_active %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% elif not user.is_approved %}
+                                    <span class="badge bg-warning">Pending Approval</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Joined
+                                <span>{{ user.created_at.strftime('%d %b %Y') }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Last Login
+                                <span>{{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {% if not user.is_approved %}
+                            <a href="{{ url_for('admin.approve_user', user_id=user.id) }}" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Approve User
+                            </a>
+                        {% endif %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="fas fa-trash me-2"></i>Delete User
+                        </button>
+                    </div>
+                    
+                    <!-- Delete Modal -->
+                    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Delete</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete user <strong>{{ user.username }}</strong>? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="btn btn-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit User Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name or '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="admin" {% if user.role.value == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="producer" {% if user.role.value == 'producer' %}selected{% endif %}>Producer</option>
+                                <option value="artist" {% if user.role.value == 'artist' %}selected{% endif %}>Artist</option>
+                                <option value="user" {% if user.role.value == 'user' %}selected{% endif %}>Regular User</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4">{{ user.bio or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="profile_image" class="form-label">Profile Image</label>
+                            <input type="file" class="form-control" id="profile_image" name="profile_image">
+                            <div class="form-text">Leave empty to keep current image</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if user.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Account Active</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_approved" name="is_approved" {% if user.is_approved %}checked{% endif %}>
+                                <label class="form-check-label" for="is_approved">Account Approved</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password (leave blank to keep current)</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

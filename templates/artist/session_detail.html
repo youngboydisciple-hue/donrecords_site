@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Session Details</h1>
+            <p class="lead">{{ session.session_date.strftime('%B %d, %Y') }} | {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.sessions') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Sessions
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Session Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Status:</div>
+                        <div class="col-md-8">
+                            {% if session.status.value == 'requested' %}
+                                <span class="badge bg-warning">Pending Confirmation</span>
+                            {% elif session.status.value == 'confirmed' %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% elif session.status.value == 'completed' %}
+                                <span class="badge bg-info">Completed</span>
+                            {% elif session.status.value == 'cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Producer:</div>
+                        <div class="col-md-8">{{ producer.get_full_name() }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Date:</div>
+                        <div class="col-md-8">{{ session.session_date.strftime('%A, %B %d, %Y') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Time:</div>
+                        <div class="col-md-8">{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Duration:</div>
+                        <div class="col-md-8">
+                            {% set duration = ((session.end_time.hour * 60 + session.end_time.minute) - (session.start_time.hour * 60 + session.start_time.minute)) / 60 %}
+                            {{ duration|round(1) }} hours
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Price:</div>
+                        <div class="col-md-8">${{ session.price }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment Status:</div>
+                        <div class="col-md-8">
+                            {% if session.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning">Unpaid</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Purpose:</div>
+                        <div class="col-md-8">{{ session.purpose }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Booked On:</div>
+                        <div class="col-md-8">{{ session.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                    {% if session.notes %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Notes:</div>
+                        <div class="col-md-8">{{ session.notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        {% if session.status.value != 'cancelled' and session.status.value != 'completed' %}
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                <i class="fas fa-times-circle"></i> Cancel Session
+                            </button>
+                        {% else %}
+                            <div></div>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('artist.send_message', recipient_id=producer.id) }}" class="btn btn-primary">
+                            <i class="fas fa-envelope"></i> Message Producer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Producer Information</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if producer.profile_image %}
+                        <img src="{{ url_for('static', filename=producer.profile_image) }}" 
+                             class="rounded-circle mb-3" alt="{{ producer.username }}" 
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width: 120px; height: 120px;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <h5>{{ producer.get_full_name() }}</h5>
+                    <p class="text-muted">Producer</p>
+                    
+                    {% if producer.bio %}
+                        <div class="text-start mt-3">
+                            <h6 class="fw-bold">Bio:</h6>
+                            <p>{{ producer.bio }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{{ url_for('artist.book_session', producer_id=producer.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-calendar-plus"></i> Book Another Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Session Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelModalLabel">Confirm Cancellation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this session?</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form action="{{ url_for('artist.cancel_session', session_id=session.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

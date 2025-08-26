@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Send Message</h1>
+            <p class="lead">Communicate with producers and administrators</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.messages') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Messages
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">New Message</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        <div class="mb-3">
+                            <label for="recipient_id" class="form-label">To:</label>
+                            <select class="form-select" id="recipient_id" name="recipient_id" required>
+                                <option value="" selected disabled>Choose a recipient...</option>
+                                {% for recipient in recipients %}
+                                    <option value="{{ recipient.id }}" {% if original_message and original_message.sender_id == recipient.id %}selected{% endif %}>
+                                        {{ recipient.get_full_name() }} ({{ recipient.role.value|capitalize }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject:</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required
+                                   value="{% if original_message %}Re: {{ original_message.subject }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="body" class="form-label">Message:</label>
+                            <textarea class="form-control" id="body" name="body" rows="6" required>{% if original_message %}
+
+
+------ Original Message ------
+From: {{ original_message.sender.get_full_name() }}
+Date: {{ original_message.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+Subject: {{ original_message.subject }}
+
+{{ original_message.body }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

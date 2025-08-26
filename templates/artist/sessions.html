@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">My Sessions</h1>
+            <p class="lead">Manage your recording sessions</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.book_session') }}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Book New Session
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Session Bookings</h5>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                    {% if status_filter %}
+                        Filter: {{ status_filter|capitalize }}
+                    {% else %}
+                        Filter: All
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterDropdown">
+                    <li><a class="dropdown-item" href="{{ url_for('artist.sessions') }}">All Sessions</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    {% for status in session_statuses %}
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('artist.sessions', status=status.value) }}">
+                                {{ status.value|capitalize }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if sessions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Producer</th>
+                                <th>Status</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr>
+                                <td>{{ session.session_date.strftime('%b %d, %Y') }}</td>
+                                <td>{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ session.producer.get_full_name() }}</td>
+                                <td>
+                                    {% if session.status.value == 'requested' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif session.status.value == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% elif session.status.value == 'completed' %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% elif session.status.value == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>${{ session.price }}</td>
+                                <td>
+                                    <a href="{{ url_for('artist.session_detail', session_id=session.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if pagination.pages > 1 %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if pagination.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('artist.sessions', page=pagination.prev_num, status=status_filter) }}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page %}
+                                {% if page == pagination.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('artist.sessions', page=page, status=status_filter) }}">{{ page }}</a>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('artist.sessions', page=pagination.next_num, status=status_filter) }}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> You don't have any sessions yet.
+                    <a href="{{ url_for('artist.book_session') }}">Book a session now</a>.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

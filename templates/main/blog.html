@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4">Don Records Blog</h1>
+            <p class="lead">Stay updated with the latest news, tips, and insights from the music industry.</p>
+        </div>
+    </div>
+    
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" action="{{ url_for('main.blog') }}">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search blog posts..." value="{{ request.args.get('search', '') }}">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Blog Posts -->
+    <div class="row">
+        {% if posts %}
+            {% for post in posts %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="{{ post.featured_image if post.featured_image else '/static/img/blog-placeholder.jpg' }}" 
+                                 class="img-fluid rounded-start h-100" alt="{{ post.title }}" style="object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="{{ url_for('main.blog_post', slug=post.slug) }}" 
+                                       class="text-decoration-none">{{ post.title }}</a>
+                                </h5>
+                                <p class="card-text">{{ post.excerpt or (post.content[:200] + '...') }}</p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ post.published_at.strftime('%B %d, %Y') }}
+                                        <span class="ms-3">
+                                            <i class="fas fa-eye"></i> {{ post.view_count }} views
+                                        </span>
+                                        {% if post.author %}
+                                        <span class="ms-3">
+                                            <i class="fas fa-user"></i> {{ post.author.username }}
+                                        </span>
+                                        {% endif %}
+                                    </small>
+                                </p>
+                                <a href="{{ url_for('main.blog_post', slug=post.slug) }}" 
+                                   class="btn btn-primary">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h4>No blog posts found</h4>
+                    {% if request.args.get('search') %}
+                        <p>No posts match your search term "{{ request.args.get('search') }}". Try different keywords.</p>
+                        <a href="{{ url_for('main.blog') }}" class="btn btn-primary">View All Posts</a>
+                    {% else %}
+                        <p>Check back later for new content!</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Blog pagination">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.blog', page=pagination.prev_num, search=request.args.get('search')) }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.blog', page=page_num, search=request.args.get('search')) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.blog', page=pagination.next_num, search=request.args.get('search')) }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

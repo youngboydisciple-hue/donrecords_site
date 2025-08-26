@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fab fa-paypal me-2"></i>PayPal Payment for Session</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5>Session Details</h5>
+                        <p><strong>Date:</strong> {{ session.session_date.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Time:</strong> {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</p>
+                        <p><strong>Producer:</strong> {{ session.producer.get_full_name() }}</p>
+                        <p><strong>Amount:</strong> ${{ transaction.amount }}</p>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <div id="paypal-button-container" class="my-4"></div>
+                        <div class="spinner-border text-primary" role="status" id="loading-indicator">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Please wait while we connect to PayPal...</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Do not close this window until the payment is complete.</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                        <a href="{{ url_for('artist.session_detail', session_id=session.id) }}" class="btn btn-outline-secondary">Cancel Payment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide the PayPal button container initially
+        document.getElementById('paypal-button-container').style.display = 'none';
+        
+        // Initialize PayPal button
+        setTimeout(function() {
+            // Hide loading indicator
+            document.getElementById('loading-indicator').style.display = 'none';
+            // Show PayPal button container
+            document.getElementById('paypal-button-container').style.display = 'block';
+            
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: '{{ transaction.amount }}'
+                            },
+                            description: 'Session Booking on {{ session.session_date.strftime("%Y-%m-%d") }}'
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        // Send the payment details to our server
+                        fetch('/session-payment-webhook', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                transaction_id: '{{ transaction.transaction_id }}',
+                                status: 'completed',
+                                paypal_order_id: data.orderID,
+                                paypal_details: details
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Redirect to the payment complete page
+                            window.location.href = '{{ url_for("payments.session_payment_complete", transaction_id=transaction.transaction_id) }}';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('There was an error processing your payment. Please contact support.');
+                        });
+                    });
+                },
+                onError: function(err) {
+                    console.error('Error:', err);
+                    alert('There was an error processing your payment. Please try again or use a different payment method.');
+                }
+            }).render('#paypal-button-container');
+        }, 1500); // Simulate loading for 1.5 seconds
+    });
+</script>
+{% endblock %}

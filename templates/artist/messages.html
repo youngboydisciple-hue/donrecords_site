@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">My Messages</h1>
+            <p class="lead">Communicate with producers and administrators</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.send_message') }}" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> New Message
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Messages</h5>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('artist.messages', filter='received') }}" class="btn btn-sm {% if filter_type == 'received' %}btn-light{% else %}btn-outline-light{% endif %}">
+                    Received
+                </a>
+                <a href="{{ url_for('artist.messages', filter='sent') }}" class="btn btn-sm {% if filter_type == 'sent' %}btn-light{% else %}btn-outline-light{% endif %}">
+                    Sent
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                <div class="list-group">
+                    {% for message in messages %}
+                        <a href="{{ url_for('artist.message_detail', message_id=message.id) }}" class="list-group-item list-group-item-action {% if not message.is_read and filter_type == 'received' and message.recipient_id == current_user.id %}fw-bold{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% if not message.is_read and filter_type == 'received' and message.recipient_id == current_user.id %}
+                                        <i class="fas fa-circle text-primary me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+                                    {% endif %}
+                                    {{ message.subject }}
+                                </h5>
+                                <small>{{ message.created_at.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            <div class="d-flex w-100 justify-content-between">
+                                <p class="mb-1 text-truncate" style="max-width: 80%;">{{ message.body }}</p>
+                                <small>
+                                    {% if filter_type == 'received' %}
+                                        From: {{ message.sender.get_full_name() }}
+                                    {% else %}
+                                        To: {{ message.recipient.get_full_name() }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <small class="text-muted">{{ message.created_at.strftime('%I:%M %p') }}</small>
+                        </a>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if pagination.pages > 1 %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if pagination.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('artist.messages', page=pagination.prev_num, filter=filter_type) }}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page %}
+                                {% if page == pagination.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('artist.messages', page=page, filter=filter_type) }}">{{ page }}</a>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('artist.messages', page=pagination.next_num, filter=filter_type) }}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    {% if filter_type == 'received' %}
+                        You don't have any received messages.
+                    {% else %}
+                        You haven't sent any messages yet.
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

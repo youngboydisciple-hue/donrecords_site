@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Beats Catalog</h1>
+    
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="GET" action="{{ url_for('main.beats') }}" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search beats..." value="{{ request.args.get('search', '') }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="genreFilter" onchange="window.location = this.value;">
+                <option value="{{ url_for('main.beats') }}">All Genres</option>
+                {% for genre in genres %}
+                    <option value="{{ url_for('main.beats', genre=genre[0]) }}" {% if request.args.get('genre') == genre[0] %}selected{% endif %}>{{ genre[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <!-- Beats Grid -->
+    <div class="row">
+        {% if beats %}
+            {% for beat in beats %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ url_for('static', filename=beat.cover_image) if beat.cover_image else url_for('static', filename='img/default-beat.jpg') }}" class="card-img-top" alt="{{ beat.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ beat.title }}</h5>
+                            <p class="card-text">{{ beat.description|truncate(100) }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">{{ beat.genre }}</span>
+                                <span class="fw-bold">${{ beat.price }}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent d-flex justify-content-between">
+                            <a href="{{ url_for('main.beat_detail', beat_id=beat.id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                            <form action="{{ url_for('main.add_to_cart') }}" method="post">
+                                <input type="hidden" name="item_id" value="{{ beat.id }}">
+                                <input type="hidden" name="item_type" value="beat">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-sm btn-primary">Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p>No beats found matching your criteria.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.beats', page=pagination.prev_num, genre=request.args.get('genre'), search=request.args.get('search')) }}">&laquo; Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Previous</span>
+                </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.beats', page=page_num, genre=request.args.get('genre'), search=request.args.get('search')) }}">{{ page_num }}</a>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.beats', page=pagination.next_num, genre=request.args.get('genre'), search=request.args.get('search')) }}">Next &raquo;</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next &raquo;</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

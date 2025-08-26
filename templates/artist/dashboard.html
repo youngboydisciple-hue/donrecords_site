@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Artist Dashboard</h1>
+            <p class="lead">Welcome back, {{ current_user.get_full_name() }}!</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.book_session') }}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Book New Session
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Stats -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>Upcoming Sessions</div>
+                        <span class="badge bg-primary rounded-pill">{{ upcoming_sessions|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>Unread Messages</div>
+                        <span class="badge bg-danger rounded-pill">{{ unread_messages_count }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('artist.profile') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </a>
+                        <a href="{{ url_for('artist.messages') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-envelope"></i> View Messages
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Sessions -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar"></i> Upcoming Sessions</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Producer</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in upcoming_sessions %}
+                                    <tr>
+                                        <td>{{ session.session_date.strftime('%b %d, %Y') }}</td>
+                                        <td>{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</td>
+                                        <td>{{ session.producer.get_full_name() }}</td>
+                                        <td>
+                                            {% if session.status.value == 'requested' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif session.status.value == 'confirmed' %}
+                                                <span class="badge bg-success">Confirmed</span>
+                                            {% elif session.status.value == 'completed' %}
+                                                <span class="badge bg-info">Completed</span>
+                                            {% elif session.status.value == 'cancelled' %}
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('artist.session_detail', session_id=session.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="{{ url_for('artist.sessions') }}" class="btn btn-outline-primary btn-sm">
+                                View All Sessions
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You don't have any upcoming sessions.
+                            <a href="{{ url_for('artist.book_session') }}">Book a session now</a>.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Producers -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Available Producers</h5>
+                </div>
+                <div class="card-body">
+                    {% if producers %}
+                        <div class="row">
+                            {% for producer in producers %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            {% if producer.profile_image %}
+                                                <img src="{{ url_for('static', filename=producer.profile_image) }}" 
+                                                     class="rounded-circle mb-3" alt="{{ producer.username }}" 
+                                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3"
+                                                     style="width: 100px; height: 100px;">
+                                                    <i class="fas fa-user fa-3x text-white"></i>
+                                                </div>
+                                            {% endif %}
+                                            <h5 class="card-title">{{ producer.get_full_name() }}</h5>
+                                            <p class="card-text small text-muted">
+                                                {% if producer.bio %}
+                                                    {{ producer.bio|truncate(100) }}
+                                                {% else %}
+                                                    No bio available
+                                                {% endif %}
+                                            </p>
+                                            <a href="{{ url_for('artist.book_session', producer_id=producer.id) }}" class="btn btn-sm btn-primary">
+                                                Book Session
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No producers are currently available.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

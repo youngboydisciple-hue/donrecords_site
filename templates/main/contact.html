@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4">Get In Touch</h1>
+            <p class="lead">Have questions about our beats or services? We'd love to hear from you!</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Contact Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-envelope"></i> Send Us a Message</h4>
+                </div>
+                <div class="card-body">
+                    <form id="contactForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject *</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Choose a subject...</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="beats">Beat Licensing</option>
+                                <option value="custom">Custom Beat Request</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="support">Technical Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="6" 
+                                      placeholder="Tell us more about your inquiry..." required></textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="newsletter" name="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to our newsletter for updates on new beats and offers
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-map-marker-alt text-primary"></i> Address</h6>
+                        <p class="text-muted mb-0">123 Music Street<br>Studio City, CA 90028<br>United States</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-phone text-success"></i> Phone</h6>
+                        <p class="text-muted mb-0">
+                            <a href="tel:+1234567890" class="text-decoration-none">+1 (234) 567-8900</a>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-envelope text-info"></i> Email</h6>
+                        <p class="text-muted mb-0">
+                            <a href="mailto:info@donrecords.com" class="text-decoration-none">info@donrecords.com</a>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-clock text-warning"></i> Business Hours</h6>
+                        <p class="text-muted mb-0">
+                            Monday - Friday: 9:00 AM - 8:00 PM<br>
+                            Saturday: 10:00 AM - 6:00 PM<br>
+                            Sunday: 12:00 PM - 5:00 PM
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-share-alt"></i> Follow Us</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-info">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-danger">
+                            <i class="fab fa-instagram"></i> Instagram
+                        </a>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fab fa-soundcloud"></i> SoundCloud
+                        </a>
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="fab fa-spotify"></i> Spotify
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-question-circle"></i> Quick Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+                                    How do I license a beat?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="faq1" 
+                                 data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Simply browse our beats catalog, select the beat you want, choose your license type, and complete the purchase. You'll receive the files and license agreement via email.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                    Do you create custom beats?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" 
+                                 data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes! We offer custom beat production services. Contact us with your requirements, and we'll create a unique beat tailored to your vision.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                                    What file formats do you provide?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" 
+                                 data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    We provide high-quality WAV and MP3 files. Premium licenses also include trackouts (stems) for professional mixing and mastering.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-map"></i> Find Us</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="bg-light text-center py-5">
+                        <i class="fas fa-map fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Interactive map</p>
+                        <small class="text-muted">123 Music Street, Studio City, CA 90028</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(this);
+    
+    // Show success message (replace with actual form submission logic)
+    alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+    
+    // Reset form
+    this.reset();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-mobile-alt me-2"></i>M-Pesa Payment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5>Order Summary</h5>
+                        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                        <p><strong>Total Amount:</strong> ${{ transaction.amount }}</p>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='img/mpesa-logo.png') }}" alt="M-Pesa Logo" class="img-fluid mb-3" style="max-height: 80px;">
+                        <h5>Pay with M-Pesa</h5>
+                    </div>
+                    
+                    <form id="mpesa-form" class="mb-4">
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">M-Pesa Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text">+254</span>
+                                <input type="text" class="form-control" id="phone_number" placeholder="7XXXXXXXX" required>
+                            </div>
+                            <div class="form-text">Enter your M-Pesa registered phone number</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="request-payment-btn">
+                                Request Payment
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="payment-instructions" class="alert alert-success d-none">
+                        <h5><i class="fas fa-info-circle me-2"></i>Payment Instructions</h5>
+                        <p>A payment request has been sent to your phone. Please follow these steps:</p>
+                        <ol>
+                            <li>Check your phone for an M-Pesa prompt</li>
+                            <li>Enter your M-Pesa PIN to authorize the payment</li>
+                            <li>Wait for confirmation message</li>
+                        </ol>
+                        <p class="mb-0">Once payment is complete, you will be automatically redirected.</p>
+                        <div class="text-center mt-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mb-0">Waiting for payment confirmation...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Do not close this window until the payment is complete.</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                        <a href="{{ url_for('payments.my_orders') }}" class="btn btn-outline-secondary">Cancel Payment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mpesaForm = document.getElementById('mpesa-form');
+        const paymentInstructions = document.getElementById('payment-instructions');
+        const requestPaymentBtn = document.getElementById('request-payment-btn');
+        
+        mpesaForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable the button and show loading state
+            requestPaymentBtn.disabled = true;
+            requestPaymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+            
+            // Get the phone number
+            const phoneNumber = '+254' + document.getElementById('phone_number').value;
+            
+            // Simulate API call to initiate M-Pesa payment
+            setTimeout(function() {
+                // Hide the form and show payment instructions
+                mpesaForm.classList.add('d-none');
+                paymentInstructions.classList.remove('d-none');
+                
+                // Simulate payment confirmation
+                checkPaymentStatus();
+            }, 2000);
+        });
+        
+        function checkPaymentStatus() {
+            // Simulate checking payment status every 5 seconds
+            const checkInterval = setInterval(function() {
+                // Simulate a successful payment after random time (10-20 seconds)
+                if (Math.random() > 0.7) {
+                    clearInterval(checkInterval);
+                    
+                    // Send confirmation to server
+                    fetch('/payment-webhook', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            transaction_id: '{{ transaction.transaction_id }}',
+                            status: 'completed',
+                            mpesa_receipt: 'MP' + Math.floor(Math.random() * 1000000000)
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Redirect to payment complete page
+                        window.location.href = '{{ url_for("payments.payment_complete", transaction_id=transaction.transaction_id) }}';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your payment. Please contact support.');
+                    });
+                }
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %}

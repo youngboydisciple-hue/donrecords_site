@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Session Details</h1>
+            <p class="lead">{{ session.session_date.strftime('%B %d, %Y') }} | {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('producer.sessions') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Sessions
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Session Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Status:</div>
+                        <div class="col-md-8">
+                            {% if session.status.value == 'requested' %}
+                                <span class="badge bg-warning">Pending Confirmation</span>
+                            {% elif session.status.value == 'confirmed' %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% elif session.status.value == 'completed' %}
+                                <span class="badge bg-info">Completed</span>
+                            {% elif session.status.value == 'cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Artist:</div>
+                        <div class="col-md-8">{{ artist.get_full_name() }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Date:</div>
+                        <div class="col-md-8">{{ session.session_date.strftime('%A, %B %d, %Y') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Time:</div>
+                        <div class="col-md-8">{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Duration:</div>
+                        <div class="col-md-8">
+                            {% set duration = ((session.end_time.hour * 60 + session.end_time.minute) - (session.start_time.hour * 60 + session.start_time.minute)) / 60 %}
+                            {{ duration|round(1) }} hours
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Price:</div>
+                        <div class="col-md-8">${{ session.price }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment Status:</div>
+                        <div class="col-md-8">
+                            {% if session.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning">Unpaid</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Purpose:</div>
+                        <div class="col-md-8">{{ session.purpose }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Booked On:</div>
+                        <div class="col-md-8">{{ session.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                    {% if session.notes %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Notes:</div>
+                        <div class="col-md-8">{{ session.notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Update Status Form -->
+            {% if session.status.value != 'cancelled' %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Update Session Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('producer.update_session_status', session_id=session.id) }}">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                {% for status in session_statuses %}
+                                    {% if status.value != 'cancelled' %}
+                                        <option value="{{ status.value }}" {% if session.status.value == status.value %}selected{% endif %}>
+                                            {{ status.value|capitalize }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes to Artist</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any notes or instructions for the artist..."></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Status
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Artist Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if artist.profile_image %}
+                            <img src="{{ url_for('static', filename=artist.profile_image) }}" 
+                                 class="img-fluid rounded-circle mb-3" alt="{{ artist.username }}" 
+                                 style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3"
+                                 style="width: 150px; height: 150px;">
+                                <i class="fas fa-user fa-5x text-white"></i>
+                            </div>
+                        {% endif %}
+                        <h5>{{ artist.get_full_name() }}</h5>
+                    </div>
+                    
+                    {% if artist.phone_number %}
+                    <div class="mb-2">
+                        <strong><i class="fas fa-phone"></i> Phone:</strong> {{ artist.phone_number }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <strong><i class="fas fa-envelope"></i> Email:</strong> {{ artist.email }}
+                    </div>
+                    
+                    {% if artist.bio %}
+                    <div class="mb-3">
+                        <strong><i class="fas fa-info-circle"></i> Bio:</strong>
+                        <p class="mt-1">{{ artist.bio }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid">
+                        <a href="{{ url_for('producer.send_message', recipient_id=artist.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope"></i> Message Artist
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

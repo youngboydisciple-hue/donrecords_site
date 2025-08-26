@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">My Orders</h1>
+    
+    <!-- Filter Controls -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('payments.my_orders') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Orders</option>
+                        {% for status in statuses %}
+                        <option value="{{ status.value }}" {% if status_filter == status.value %}selected{% endif %}>{{ status.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Orders List -->
+    {% if orders %}
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Your Orders</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                            <td>${{ order.total_amount }}</td>
+                            <td>
+                                {% if order.status.value == 'pending' %}
+                                <span class="badge bg-warning text-dark">{{ order.status.name }}</span>
+                                {% elif order.status.value == 'paid' %}
+                                <span class="badge bg-success">{{ order.status.name }}</span>
+                                {% elif order.status.value == 'shipped' %}
+                                <span class="badge bg-info">{{ order.status.name }}</span>
+                                {% elif order.status.value == 'delivered' %}
+                                <span class="badge bg-primary">{{ order.status.name }}</span>
+                                {% elif order.status.value == 'cancelled' %}
+                                <span class="badge bg-danger">{{ order.status.name }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ order.status.name }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('payments.order_detail', order_number=order.order_number) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('payments.my_orders', page=pagination.prev_num, status=status_filter) }}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+            </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('payments.my_orders', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">…</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('payments.my_orders', page=pagination.next_num, status=status_filter) }}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">You don't have any orders yet. <a href="{{ url_for('main.beats') }}">Browse our beats</a> or <a href="{{ url_for('main.merchandise') }}">merchandise</a>.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

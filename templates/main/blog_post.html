@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <article class="blog-post">
+                <!-- Featured Image -->
+                {% if post.featured_image %}
+                <div class="mb-4">
+                    <img src="{{ post.featured_image }}" class="img-fluid rounded" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+                
+                <!-- Post Header -->
+                <header class="mb-4">
+                    <h1 class="display-5">{{ post.title }}</h1>
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-calendar"></i> {{ post.published_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        <span class="ms-3">
+                            <i class="fas fa-eye"></i> {{ post.view_count }} views
+                        </span>
+                        {% if post.author %}
+                        <span class="ms-3">
+                            <i class="fas fa-user"></i> {{ post.author.username }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if post.excerpt %}
+                    <div class="alert alert-light">
+                        <strong>{{ post.excerpt }}</strong>
+                    </div>
+                    {% endif %}
+                </header>
+                
+                <!-- Post Content -->
+                <div class="post-content">
+                    {{ post.content|safe }}
+                </div>
+                
+                <!-- Post Footer -->
+                <footer class="mt-5 pt-4 border-top">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('main.blog') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Blog
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <!-- Social sharing buttons -->
+                            <div class="btn-group" role="group" aria-label="Share post">
+                                <a href="https://twitter.com/intent/tweet?text={{ post.title }}&url={{ request.url }}" 
+                                   class="btn btn-outline-info btn-sm" target="_blank">
+                                    <i class="fab fa-twitter"></i> Tweet
+                                </a>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" 
+                                   class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="fab fa-facebook-f"></i> Share
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard()">
+                                    <i class="fas fa-link"></i> Copy Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </article>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 20px;">
+                <!-- Recent Posts -->
+                {% if recent_posts %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-newspaper"></i> Recent Posts</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for recent_post in recent_posts %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <img src="{{ recent_post.featured_image if recent_post.featured_image else '/static/img/blog-placeholder.jpg' }}" 
+                                     class="img-thumbnail" alt="{{ recent_post.title }}" style="width: 60px; height: 60px; object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('main.blog_post', slug=recent_post.slug) }}" 
+                                       class="text-decoration-none">{{ recent_post.title }}</a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> {{ recent_post.published_at.strftime('%b %d, %Y') }}
+                                </small>
+                            </div>
+                        </div>
+                        {% if not loop.last %}<hr class="my-2">{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Newsletter Signup -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-envelope"></i> Stay Updated</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Get the latest beats and music industry news delivered to your inbox.</p>
+                        <form>
+                            <div class="mb-3">
+                                <input type="email" class="form-control" placeholder="Your email address" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Follow Us -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-share-alt"></i> Follow Us</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="social-icons">
+                            <a href="#" class="btn btn-outline-dark btn-sm me-2 mb-2">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </a>
+                            <a href="#" class="btn btn-outline-info btn-sm me-2 mb-2">
+                                <i class="fab fa-twitter"></i> Twitter
+                            </a>
+                            <a href="#" class="btn btn-outline-danger btn-sm me-2 mb-2">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                            <a href="#" class="btn btn-outline-dark btn-sm me-2 mb-2">
+                                <i class="fab fa-soundcloud"></i> SoundCloud
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        alert('Link copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}

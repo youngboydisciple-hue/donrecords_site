@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Producer Dashboard</h1>
+            <p class="lead">Welcome back, {{ current_user.get_full_name() }}!</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('producer.new_beat') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Upload New Beat
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Total Beats</h6>
+                            <h2 class="mb-0">{{ beats_count }}</h2>
+                        </div>
+                        <i class="fas fa-music fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="{{ url_for('producer.beats') }}" class="text-white text-decoration-none">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Published Beats</h6>
+                            <h2 class="mb-0">{{ published_beats }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="{{ url_for('producer.beats') }}" class="text-white text-decoration-none">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Total Plays</h6>
+                            <h2 class="mb-0">{{ total_plays }}</h2>
+                        </div>
+                        <i class="fas fa-play-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="text-white text-decoration-none">All Time</span>
+                    <div class="small text-white"><i class="fas fa-headphones"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Pending Sessions</h6>
+                            <h2 class="mb-0">{{ pending_sessions }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="{{ url_for('producer.sessions', status='requested') }}" class="text-white text-decoration-none">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Sessions -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar"></i> Upcoming Sessions</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Artist</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in upcoming_sessions %}
+                                    <tr>
+                                        <td>{{ session.session_date.strftime('%b %d, %Y') }}</td>
+                                        <td>{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</td>
+                                        <td>{{ session.artist.get_full_name() }}</td>
+                                        <td>
+                                            {% if session.status.value == 'requested' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif session.status.value == 'confirmed' %}
+                                                <span class="badge bg-success">Confirmed</span>
+                                            {% elif session.status.value == 'completed' %}
+                                                <span class="badge bg-info">Completed</span>
+                                            {% elif session.status.value == 'cancelled' %}
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('producer.session_detail', session_id=session.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="{{ url_for('producer.sessions') }}" class="btn btn-outline-primary btn-sm">
+                                View All Sessions
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You don't have any upcoming sessions.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Beats -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-music"></i> Recent Beats</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_beats %}
+                        <div class="list-group">
+                            {% for beat in recent_beats %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            {% if beat.cover_image %}
+                                                <img src="{{ url_for('static', filename=beat.cover_image) }}" 
+                                                     class="me-3" alt="{{ beat.title }}" 
+                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-secondary d-flex align-items-center justify-content-center me-3"
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-music text-white"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ beat.title }}</h6>
+                                                <small class="text-muted">{{ beat.genre }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="mb-1">
+                                                <span class="badge {% if beat.is_published %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {% if beat.is_published %}Published{% else %}Draft{% endif %}
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">${{ beat.price }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="{{ url_for('producer.beats') }}" class="btn btn-outline-primary btn-sm">
+                                View All Beats
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You haven't uploaded any beats yet.
+                            <a href="{{ url_for('producer.new_beat') }}">Upload your first beat</a>.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-link"></i> Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="d-grid">
+                                <a href="{{ url_for('producer.profile') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-edit"></i> Edit Profile
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-grid">
+                                <a href="{{ url_for('producer.new_beat') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus"></i> Upload Beat
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-grid">
+                                <a href="{{ url_for('producer.messages') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-envelope"></i> Messages
+                                    {% if unread_messages_count > 0 %}
+                                        <span class="badge bg-danger ms-1">{{ unread_messages_count }}</span>
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-grid">
+                                <a href="{{ url_for('producer.sessions') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-calendar-alt"></i> Sessions
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

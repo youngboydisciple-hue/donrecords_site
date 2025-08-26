@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Session Payment Complete</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                        <h2 class="mt-3">Payment Successful!</h2>
+                        <p class="lead">Your session booking has been confirmed.</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h5>Session Details</h5>
+                        <p><strong>Date:</strong> {{ session.session_date.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Time:</strong> {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</p>
+                        <p><strong>Producer:</strong> {{ session.producer.get_full_name() }}</p>
+                        <p><strong>Duration:</strong> {{ session.duration }} hours</p>
+                        <p><strong>Amount Paid:</strong> ${{ transaction.amount }}</p>
+                        <p><strong>Payment Method:</strong> {{ transaction.payment_method.name }}</p>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <p class="mb-0">A confirmation message has been sent to both you and the producer. Please arrive at the studio 15 minutes before your scheduled time.</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                        <a href="{{ url_for('artist.session_detail', session_id=session.id) }}" class="btn btn-primary">View Session Details</a>
+                        <a href="{{ url_for('artist.dashboard') }}" class="btn btn-outline-secondary">Return to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

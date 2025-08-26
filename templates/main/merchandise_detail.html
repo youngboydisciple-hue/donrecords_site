@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <article class="blog-post">
+                <!-- Featured Image -->
+                {% if post.featured_image %}
+                <div class="mb-4">
+                    <img src="{{ post.featured_image }}" class="img-fluid rounded" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+                
+                <!-- Post Header -->
+                <header class="mb-4">
+                    <h1 class="display-5">{{ post.title }}</h1>
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-calendar"></i> {{ post.published_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        <span class="ms-3">
+                            <i class="fas fa-eye"></i> {{ post.view_count }} views
+                        </span>
+                        {% if post.author %}
+                        <span class="ms-3">
+                            <i class="fas fa-user"></i> {{ post.author.username }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if post.excerpt %}
+                    <div class="alert alert-light">
+                        <strong>{{ post.excerpt }}</strong>
+                    </div>
+                    {% endif %}
+                </header>
+                
+                <!-- Post Content -->
+                <div class="post-content">
+                    {{ post.content|safe }}
+                </div>
+                
+                <!-- Post Footer -->
+                <footer class="mt-5 pt-4 border-top">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('main.blog') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Blog
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <!-- Social sharing buttons -->
+                            <div class="btn-group" role="group" aria-label="Share post">
+                                <a href="https://twitter.com/intent/tweet?text={{ post.title }}&url={{ request.url }}" 
+                                   class="btn btn-outline-info btn-sm" targ

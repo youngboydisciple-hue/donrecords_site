@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Pay for Session</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Session Details</h5>
+                        <p><strong>Date:</strong> {{ session.session_date.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Time:</strong> {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}</p>
+                        <p><strong>Producer:</strong> {{ session.producer.get_full_name() }}</p>
+                        <p><strong>Duration:</strong> {{ session.duration }} hours</p>
+                        <p><strong>Purpose:</strong> {{ session.purpose }}</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0"><strong>Payment Amount:</strong> ${{ session.price }}</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('payments.pay_session', session_id=session.id) }}">
+                        <div class="mb-4">
+                            <label for="payment_method" class="form-label">Select Payment Method</label>
+                            <select class="form-select" id="payment_method" name="payment_method" required>
+                                <option value="" selected disabled>Choose payment method</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.value }}">{{ method.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+                            <a href="{{ url_for('artist.session_detail', session_id=session.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-secondary">
+                            <h6><i class="fas fa-info-circle me-2"></i>Payment Information</h6>
+                            <p class="mb-0">Your session booking will be confirmed once payment is complete. You will receive a confirmation message after successful payment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

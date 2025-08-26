@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 bg-dark text-white text-center">
+    <div class="container">
+        <h1 class="display-4">Welcome to Don Records</h1>
+        <p class="lead">Your premier destination for beats, merchandise, and studio sessions.</p>
+        <div class="mt-4">
+            <a href="{{ url_for('main.beats') }}" class="btn btn-primary btn-lg me-2">Browse Beats</a>
+            <a href="{{ url_for('main.merchandise') }}" class="btn btn-outline-light btn-lg">Shop Merchandise</a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Beats Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Featured Beats</h2>
+        <div class="row">
+            {% if featured_beats %}
+                {% for beat in featured_beats %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <img src="{{ url_for('static', filename=beat.cover_image) if beat.cover_image else url_for('static', filename='img/default-beat.jpg') }}" class="card-img-top" alt="{{ beat.title }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ beat.title }}</h5>
+                                <p class="card-text">{{ beat.description|truncate(100) }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">{{ beat.genre }}</span>
+                                    <span class="fw-bold">${{ beat.price }}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent d-flex justify-content-between">
+                                <a href="{{ url_for('main.beat_detail', beat_id=beat.id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                                <form action="{{ url_for('main.add_to_cart') }}" method="post">
+                                    <input type="hidden" name="item_id" value="{{ beat.id }}">
+                                    <input type="hidden" name="item_type" value="beat">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-sm btn-primary">Add to Cart</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No featured beats available at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.beats') }}" class="btn btn-outline-primary">View All Beats</a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Merchandise Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Featured Merchandise</h2>
+        <div class="row">
+            {% if featured_merch %}
+                {% for merch in featured_merch %}
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100">
+                            <img src="{{ url_for('static', filename=merch.image) if merch.image else url_for('static', filename='img/default-merch.jpg') }}" class="card-img-top" alt="{{ merch.name }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ merch.name }}</h5>
+                                <p class="card-text">{{ merch.description|truncate(80) }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-secondary">{{ merch.category }}</span>
+                                    <span class="fw-bold">${{ merch.price }}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent d-flex justify-content-between">
+                                <a href="{{ url_for('main.merchandise_detail', merch_id=merch.id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                                <form action="{{ url_for('main.add_to_cart') }}" method="post">
+                                    <input type="hidden" name="item_id" value="{{ merch.id }}">
+                                    <input type="hidden" name="item_type" value="merchandise">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-sm btn-primary" {% if merch.stock_quantity < 1 %}disabled{% endif %}>
+                                        {% if merch.stock_quantity < 1 %}Out of Stock{% else %}Add to Cart{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No featured merchandise available at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.merchandise') }}" class="btn btn-outline-primary">View All Merchandise</a>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Blog Posts Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Latest from the Blog</h2>
+        <div class="row">
+            {% if recent_posts %}
+                {% for post in recent_posts %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if post.featured_image %}
+                                <img src="{{ url_for('static', filename=post.featured_image) }}" class="card-img-top" alt="{{ post.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ post.title }}</h5>
+                                <p class="card-text">{{ post.excerpt or post.content|striptags|truncate(150) }}</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ post.published_at.strftime('%B %d, %Y') }}</small>
+                                    <a href="{{ url_for('main.blog_post', slug=post.slug) }}" class="btn btn-sm btn-outline-primary">Read More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No blog posts available at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.blog') }}" class="btn btn-outline-primary">View All Posts</a>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+        <h2>Ready to Create Your Next Hit?</h2>
+        <p class="lead">Book a studio session with our talented producers today.</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mt-3">Get Started</a>
+    </div>
+</section>
+{% endblock %}

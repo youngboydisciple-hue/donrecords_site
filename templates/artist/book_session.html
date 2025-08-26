@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Book a Session</h1>
+            <p class="lead">Schedule a recording session with one of our producers</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('artist.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Session Details</h5>
+                </div>
+                <div class="card-body">
+                    {% if producers %}
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label for="producer_id" class="form-label">Select Producer</label>
+                                <select class="form-select" id="producer_id" name="producer_id" required>
+                                    <option value="" selected disabled>Choose a producer...</option>
+                                    {% for producer in producers %}
+                                        <option value="{{ producer.id }}" {% if request.args.get('producer_id')|int == producer.id %}selected{% endif %}>
+                                            {{ producer.get_full_name() }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="session_date" class="form-label">Session Date</label>
+                                <input type="date" class="form-control" id="session_date" name="session_date" 
+                                       min="{{ min_date }}" required>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="start_time" class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="start_time" name="start_time" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="end_time" class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="end_time" name="end_time" required>
+                                </div>
+                                <div class="form-text mt-2">
+                                    Note: Minimum booking is 2 hours at $50/hour
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="purpose" class="form-label">Purpose of Session</label>
+                                <textarea class="form-control" id="purpose" name="purpose" rows="3" required
+                                          placeholder="Describe what you want to accomplish in this session..."></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-calendar-check"></i> Request Booking
+                                </button>
+                                <div class="form-text text-center">
+                                    Your booking will need to be confirmed by the producer.
+                                </div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> No producers are currently available for booking.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default times (10 AM to 12 PM)
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('start_time').value = '10:00';
+        document.getElementById('end_time').value = '12:00';
+    });
+</script>
+{% endblock %}

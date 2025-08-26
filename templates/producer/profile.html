@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">My Profile</h1>
+            <p class="lead">Manage your producer profile information</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('producer.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Picture</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if current_user.profile_image %}
+                        <img src="{{ url_for('static', filename=current_user.profile_image) }}" 
+                             class="img-fluid rounded mb-3" alt="{{ current_user.username }}" 
+                             style="max-height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width: 200px; height: 200px;">
+                            <i class="fas fa-user fa-5x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('profile_image').click()">
+                            <i class="fas fa-camera"></i> Change Picture
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Username:</strong> {{ current_user.username }}
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">{{ current_user.role.value|capitalize }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <input type="file" id="profile_image" name="profile_image" class="d-none" onchange="document.getElementById('submit-form').click()">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ current_user.first_name or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ current_user.last_name or '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="{{ current_user.email }}" disabled>
+                            <div class="form-text">Email cannot be changed. Contact admin for assistance.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ current_user.phone_number or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4">{{ current_user.bio or '' }}</textarea>
+                            <div class="form-text">Tell us about yourself, your production style, and experience.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" id="submit-form" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

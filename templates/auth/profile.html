@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% block styles %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .card {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: none;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        margin-bottom: 2rem;
+    }
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+    .profile-avatar i {
+        font-size: 3rem;
+        color: white;
+    }
+    .role-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    .role-admin { background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.3); }
+    .role-producer { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+    .role-artist { background: rgba(102, 126, 234, 0.2); color: #667eea; border: 1px solid rgba(102, 126, 234, 0.3); }
+    .role-user { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    .info-content {
+        flex: 1;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        color: #6c757d;
+    }
+    .status-online {
+        color: #28a745;
+    }
+    .status-pending {
+        color: #ffc107;
+    }
+    .status-inactive {
+        color: #dc3545;
+    }
+    .btn-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    .btn-outline-custom {
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: transparent;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-outline-custom:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .activity-item {
+        padding: 1rem;
+        border-left: 3px solid #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 1rem;
+    }
+    .activity-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <!-- Profile Header Card -->
+        <div class="card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 class="mb-1">{{ current_user.username }}</h2>
+                <p class="mb-2 opacity-75">{{ current_user.email }}</p>
+                <span class="role-badge role-{{ current_user.role.name.lower() }}">
+                    <i class="fas fa-{{ 'crown' if current_user.role.name == 'ADMIN' else 'music' if current_user.role.name == 'PRODUCER' else 'microphone-alt' if current_user.role.name == 'ARTIST' else 'user' }} me-1"></i>
+                    {{ current_user.role.name.title() }}
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <a href="#" class="btn btn-custom w-100">
+                                <i class="fas fa-edit me-2"></i>
+                                Edit Profile
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-custom w-100">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information Card -->
+        <div class="card">
+            <div class="card-header bg-transparent border-0 p-4">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                    Account Information
+                </h5>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value">{{ current_user.email }}</div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-user-tag"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Account Type</div>
+                        <div class="info-value">{{ current_user.role.name.title() }}</div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-{{ 'check-circle' if current_user.is_active else 'times-circle' }}"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value {{ 'status-online' if current_user.is_active else 'status-inactive' }}">
+                            <i class="fas fa-{{ 'check' if current_user.is_active else 'times' }} me-1"></i>
+                            {{ 'Active' if current_user.is_active else 'Inactive' }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if current_user.role.name != 'USER' %}
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-{{ 'shield-alt' if current_user.is_approved else 'clock' }}"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Approval Status</div>
+                        <div class="info-value {{ 'status-online' if current_user.is_approved else 'status-pending' }}">
+                            <i class="fas fa-{{ 'check' if current_user.is_approved else 'clock' }} me-1"></i>
+                            {{ 'Approved' if current_user.is_approved else 'Pending Approval' }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value">
+                            {% if current_user.created_at %}
+                                {{ current_user.created_at.strftime('%B %d, %Y') }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if current_user.last_login %}
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">{{ current_user.last_login.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card">
+            <div class="card-header bg-transparent border-0 p-4">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2 text-primary"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <div class="row">
+                    {% if current_user.role.name == 'ADMIN' %}
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-custom w-100">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Admin Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-users me-2"></i>
+                            Manage Users
+                        </a>
+                    </div>
+                    {% elif current_user.role.name == 'PRODUCER' %}
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('producer.dashboard') }}" class="btn btn-custom w-100">
+                            <i class="fas fa-music me-2"></i>
+                            Producer Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-plus me-2"></i>
+                            Add New Track
+                        </a>
+                    </div>
+                    {% elif current_user.role.name == 'ARTIST' %}
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('artist.dashboard') }}" class="btn btn-custom w-100">
+                            <i class="fas fa-microphone-alt me-2"></i>
+                            Artist Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-upload me-2"></i>
+                            Upload Music
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-custom w-100">
+                            <i class="fas fa-home me-2"></i>
+                            Browse Music
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-heart me-2"></i>
+                            My Favorites
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-cog me-2"></i>
+                            Account Settings
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-outline-custom w-100">
+                            <i class="fas fa-key me-2"></i>
+                            Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not current_user.is_approved and current_user.role.name != 'USER' %}
+        <!-- Pending Approval Notice -->
+        <div class="card">
+            <div class="card-body p-4 text-center">
+                <i class="fas fa-clock text-warning mb-3" style="font-size: 3rem;"></i>
+                <h5 class="text-warning mb-3">Account Pending Approval</h5>
+                <p class="text-muted mb-0">
+                    Your {{ current_user.role.name.lower() }} account is currently pending approval by an administrator. 
+                    You will receive an email notification once your account has been reviewed and approved.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+    {% endblock %}
+
+
+    {% block scripts %}
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to info items
+            const infoItems = document.querySelectorAll('.info-item');
+            infoItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(102, 126, 234, 0.05)';
+                    this.style.transform = 'translateX(5px)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'transparent';
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+
+            // Add loading states to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.href && this.href.includes('#')) {
+                        e.preventDefault();
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Coming Soon...';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

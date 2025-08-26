@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">User Details</h1>
+            <p class="lead">View and manage user information</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit User
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if user.profile_image %}
+                            <img src="{{ url_for('static', filename=user.profile_image) }}" alt="{{ user.username }}" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; background-color: #e9ecef;">
+                                <i class="fas fa-user fa-4x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                        <p class="text-muted">@{{ user.username }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Contact Information</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0">
+                                <strong>Email:</strong> {{ user.email }}
+                            </li>
+                            <li class="list-group-item px-0">
+                                <strong>Phone:</strong> {{ user.phone_number or 'Not provided' }}
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    {% if user.bio %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Bio</h6>
+                        <p class="text-sm">{{ user.bio }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Details Card -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Account Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">Role</h6>
+                            <span class="badge bg-primary fs-6">{{ user.role.value.title() }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">Account Status</h6>
+                            {% if user.is_active and user.is_approved %}
+                                <span class="badge bg-success fs-6">Active & Approved</span>
+                            {% elif not user.is_active %}
+                                <span class="badge bg-danger fs-6">Inactive</span>
+                            {% elif not user.is_approved %}
+                                <span class="badge bg-warning fs-6">Pending Approval</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">Member Since</h6>
+                            <p class="mb-0">{{ user.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">Last Login</h6>
+                            <p class="mb-0">{{ user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">User ID</h6>
+                            <p class="mb-0">#{{ user.id }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted mb-2">Email Verified</h6>
+                            {% if user.email_confirmed %}
+                                <span class="badge bg-success">Verified</span>
+                            {% else %}
+                                <span class="badge bg-warning">Unverified</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if not user.is_approved %}
+                            <form method="POST" action="{{ url_for('admin.approve_user', user_id=user.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check me-2"></i>Approve User
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Details
+                        </a>
+                        
+                        <a href="{{ url_for('admin.send_message') }}?reply_to={{ user.id }}" class="btn btn-info">
+                            <i class="fas fa-envelope me-2"></i>Send Message
+                        </a>
+                        
+                        {% if user.id != current_user.id and user.role.value != 'admin' %}
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                                <i class="fas fa-trash me-2"></i>Delete User
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Row -->
+    <div class="row">
+        <!-- User Activity Stats -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Activity Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-primary">{{ user.orders.count() if user.orders else 0 }}</h4>
+                                <p class="text-muted">Orders Placed</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-info">{{ user.session_bookings_as_artist|length + user.session_bookings_as_producer|length if user.session_bookings_as_artist and user.session_bookings_as_producer else 0 }}</h4>
+                                <p class="text-muted">Sessions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Health -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Account Health</h5>
+                </div>
+                <div class="card-body">
+                    <div class="health-checks">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Profile Complete</span>
+                            {% set profile_complete = (user.first_name and user.last_name and user.bio and user.phone_number) %}
+                            {% if profile_complete %}
+                                <span class="badge bg-success">Complete</span>
+                            {% else %}
+                                <span class="badge bg-warning">Incomplete</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Account Active</span>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Approval Status</span>
+                            {% if user.is_approved %}
+                                <span class="badge bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+{% if user.id != current_user.id and user.role.value != 'admin' %}
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+                <p>Are you sure you want to delete user <strong>{{ user.username }}</strong>?</p>
+                <p class="text-muted">This will:</p>
+                <ul class="text-muted">
+                    <li>Permanently delete the user account</li>
+                    <li>Remove all associated messages</li>
+                    <li>Cancel any pending session bookings</li>
+                    <li>Anonymize order history</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.stat-item h4 {
+    margin-bottom: 5px;
+}
+
+.health-checks .badge {
+    min-width: 80px;
+}
+
+.avatar-placeholder {
+    border: 2px solid #dee2e6;
+}
+
+.list-group-item {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+</style>
+
+{% endblock %}
